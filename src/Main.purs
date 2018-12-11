@@ -156,18 +156,17 @@ manageTrigger = do
       createAtTimeTriggers firstOfTheMonthHandler $ map (\t -> Tuple (fst t) ((+) 1 <<< snd $ t)) notificationTimes
 
 getOrThrowIdobataHookUrl :: Properties -> Effect String
-getOrThrowIdobataHookUrl props = do
-  maybeIdobataHookUrl <- getProperty "idobataHookUrl" props
-  when (isNothing maybeIdobataHookUrl) do
-    throw "idobataHookUrl property is required"
-  pure $ unsafePartial $ fromJust maybeIdobataHookUrl
+getOrThrowIdobataHookUrl = getPropertyOrThrow "idobataHookUrl"
 
 getOrThrowMessage :: Properties -> Effect String
-getOrThrowMessage props = do
-  maybeMessage <- getProperty "message" props
-  when (isNothing maybeMessage) do
-    throw "message property is required"
-  pure $ unsafePartial $ fromJust maybeMessage
+getOrThrowMessage = getPropertyOrThrow "message"
+
+getPropertyOrThrow :: String -> Properties -> Effect String
+getPropertyOrThrow key props = do
+  maybeVal <- getProperty key props
+  when (isNothing maybeVal) do
+    throw $ key <> " property is required"
+  pure $ unsafePartial $ fromJust maybeVal
 
 notify :: Effect Unit
 notify = do
