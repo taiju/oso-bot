@@ -20,7 +20,7 @@ import Foreign.Object (fromHomogeneous)
 import GAS.CalendarApp (getCalendarById)
 import GAS.CalendarApp.Calendar (getEventsForDay)
 import GAS.PropertiesService (getScriptProperties)
-import GAS.PropertiesService.Properties (getProperty)
+import GAS.PropertiesService.Properties (Properties, getProperty)
 import GAS.ScriptApp (deleteTrigger, getProjectTriggers, newTrigger)
 import GAS.ScriptApp.ClockTriggerBuilder (at, atHour, create, everyDays)
 import GAS.ScriptApp.Trigger (getHandlerFunction)
@@ -155,26 +155,31 @@ manageTrigger = do
     when (today == firstBusinessDate) do
       createAtTimeTriggers firstOfTheMonthHandler $ map (\t -> Tuple (fst t) ((+) 1 <<< snd $ t)) notificationTimes
 
+getOrThrowIdobataHookUrl :: Properties -> Effect String
+getOrThrowIdobataHookUrl props = do
+  maybeIdobataHookUrl <- getProperty "idobataHookUrl" props
+  when (isNothing maybeIdobataHookUrl) do
+    throw "idobataHookUrl property is required"
+  pure $ unsafePartial $ fromJust maybeIdobataHookUrl
+
+getOrThrowMessage :: Properties -> Effect String
+getOrThrowMessage props = do
+  maybeMessage <- getProperty "message" props
+  when (isNothing maybeMessage) do
+    throw "message property is required"
+  pure $ unsafePartial $ fromJust maybeMessage
+
 notify :: Effect Unit
 notify = do
   scriptProps <- getScriptProperties
-  maybeIdobataHookUrl <- getProperty "idobataHookUrl" scriptProps
-  maybeMessage <- getProperty "message" scriptProps
-  when (isNothing maybeIdobataHookUrl) do
-    throw "idobataHookUrl property is required"
-  when (isNothing maybeMessage) do
-    throw "message property is required"
-  let idobataHookUrl = unsafePartial $ fromJust maybeIdobataHookUrl
-  let message = unsafePartial $ fromJust maybeMessage
+  idobataHookUrl <- getOrThrowIdobataHookUrl scriptProps
+  message <- getOrThrowMessage scriptProps
   postIdobata idobataHookUrl message
 
 notifyAtFOTM :: Effect Unit
 notifyAtFOTM = do
   scriptProps <- getScriptProperties
-  maybeIdobataHookUrl <- getProperty "idobataHookUrl" scriptProps
-  when (isNothing maybeIdobataHookUrl) do
-    throw "idobataHookUrl property is required"
-  let idobataHookUrl = unsafePartial $ fromJust maybeIdobataHookUrl
+  idobataHookUrl <- getOrThrowIdobataHookUrl scriptProps
   maybeFirstOfTheMonthMessage <- getProperty "firstOfTheMonthMessage" scriptProps
   when (isJust maybeFirstOfTheMonthMessage) do
     let firstOfTheMonthMessage = unsafePartial $ fromJust maybeFirstOfTheMonthMessage
