@@ -155,11 +155,11 @@ manageTrigger = do
     when (today == firstBusinessDate) do
       createAtTimeTriggers firstOfTheMonthHandler $ map (\t -> Tuple (fst t) ((+) 1 <<< snd $ t)) notificationTimes
 
-getOrThrowIdobataHookUrl :: Properties -> Effect String
-getOrThrowIdobataHookUrl = getPropertyOrThrow "idobataHookUrl"
+getIdobataHookUrlOrThrow :: Properties -> Effect String
+getIdobataHookUrlOrThrow = getPropertyOrThrow "idobataHookUrl"
 
-getOrThrowMessage :: Properties -> Effect String
-getOrThrowMessage = getPropertyOrThrow "message"
+getMessageOrThrow :: Properties -> Effect String
+getMessageOrThrow = getPropertyOrThrow "message"
 
 getPropertyOrThrow :: String -> Properties -> Effect String
 getPropertyOrThrow key props = do
@@ -171,14 +171,14 @@ getPropertyOrThrow key props = do
 notify :: Effect Unit
 notify = do
   scriptProps <- getScriptProperties
-  idobataHookUrl <- getOrThrowIdobataHookUrl scriptProps
-  message <- getOrThrowMessage scriptProps
+  idobataHookUrl <- getIdobataHookUrlOrThrow scriptProps
+  message <- getMessageOrThrow scriptProps
   postIdobata idobataHookUrl message
 
 notifyAtFOTM :: Effect Unit
 notifyAtFOTM = do
   scriptProps <- getScriptProperties
-  idobataHookUrl <- getOrThrowIdobataHookUrl scriptProps
+  idobataHookUrl <- getIdobataHookUrlOrThrow scriptProps
   maybeFirstOfTheMonthMessage <- getProperty "firstOfTheMonthMessage" scriptProps
   when (isJust maybeFirstOfTheMonthMessage) do
     let firstOfTheMonthMessage = unsafePartial $ fromJust maybeFirstOfTheMonthMessage
