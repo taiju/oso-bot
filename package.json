@@ -1,0 +1,17 @@
+{
+  "name": "oso-bot",
+  "version": "0.0.1",
+  "description": "お掃除おじさんbot",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "pulp browserify -O --standalone Lib -t dist/lib.js"
+  },
+  "author": "HIGASHI Taiju",
+  "license": "ISC",
+  "devDependencies": {
+    "@google/clasp": "^1.6.3",
+    "bower": "^1.8.4",
+    "purescript": "^0.12.1"
+  },
+  "dependencies": {}
+}

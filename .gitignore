@@ -1,0 +1,19 @@
+# pulp
+/bower_components/
+/node_modules/
+/.pulp-cache/
+/output/
+/generated-docs/
+/.psc-package/
+/.psc*
+/.purs*
+/.psa*
+
+# project
+dist/lib.js
+
+# clasp
+.clasprc.json
+.clasp.json
+client_secret_*.json
+appsscript.json
